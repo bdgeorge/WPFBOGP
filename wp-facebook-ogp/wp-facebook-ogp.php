@@ -26,6 +26,8 @@ License: GPL2
 */
 
 define('WPFBOGP_VERSION', '1.3.5');
+include_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
+
 wpfbogp_admin_warnings();
 
 // version check
@@ -140,6 +142,7 @@ function wpfbogp_build_head() {
 		}
 		echo "\t<!-- // end wpfbogp -->\n\n";
 		} // end isset admin ids
+		var_dump(new OgpMetaModel);
 
 } // end function
 
