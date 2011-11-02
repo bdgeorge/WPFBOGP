@@ -44,11 +44,24 @@ class OgpRenderOgp {
 		return false;
 	}
 	
-	function getSiteName(){
-		if(array_key_exists('sitename', $this->_model))
-			return "\t<meta property='og:site_name' content='" . $this->_model['sitename'] . "' />\n";
+	function getDescription(){
+		if(array_key_exists('description', $this->_model))
+			return "\t<meta property='og:description' content='" . $this->_model['description'] . "' />\n";
+		return false;
+	}	
+
+	function getType(){
+		if(array_key_exists('type', $this->_model))
+			return "\t<meta property='og:type' content='" . $this->_model['description'] . "' />\n";
 		return false;
 	}	
 	
+	function getImages(){
+		if(array_key_exists('images', $this->_model))
+			foreach($this->_model['images'] as $_img){
+				
+			}
+		return false;
+	}		
 	
 }
