@@ -21,7 +21,7 @@ class OgpRenderOgp {
 		'sitename'		=> "\t<meta property='og:site_name' content='%s' />\n",
 		'admins'		=> "\t<meta property='fb:admins' content='%s' />\n",
 		'app_id'		=> "\t<meta property='fb:app_id' content='%s' />\n",
-		'page_id'		=> "\t<meta property='fb:page_id' content='%s' />\n",
+		'page_id'		=> "\t<meta gitproperty='fb:page_id' content='%s' />\n",
 		'url'			=> "\t<meta property='og:url' content='%s' />\n",
 		'title'			=> "\t<meta property='og:title' content='%s' />\n",
 		'description'	=> "\t<meta property='og:description' content='%s' />\n",
