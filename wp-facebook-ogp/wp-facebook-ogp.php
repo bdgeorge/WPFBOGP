@@ -26,9 +26,9 @@ License: GPL2
 */
 
 define('WPFBOGP_VERSION', '1.3.5');
-require_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
-require_once(dirname(__FILE__) . '/class-ogp-render.php');
-require_once(dirname(__FILE__) . '/class-ogp-render-facebook.php');
+require_once('class-ogp-meta-model.php');
+require_once('class-ogp-render.php');
+require_once('class-ogp-render-facebook.php');
 
 wpfbogp_admin_warnings();
 

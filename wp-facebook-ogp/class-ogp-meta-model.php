@@ -97,7 +97,7 @@ class OgpMetaModel {
 	function _getImages(){
 		global $post;
 		
-		if (is_singular('post')) {
+		if (is_singular(array('post','page'))) {
 			$this->_meta['images'] = array();
 			if ((function_exists('has_post_thumbnail')) && (has_post_thumbnail($post->ID))) {
 				if($_thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail' )){
@@ -109,6 +109,10 @@ class OgpMetaModel {
 			}
 			//The thumbnail (if it was found) is typically repeated later in the post
 			$this->_meta['images'] = array_unique($this->_meta['images']);
+		} elseif(is_attachment() && wp_attachment_is_image()){
+			$this->_meta['images'] = array(wp_get_attachment_url());
+			
+		//TODO: Deal with an author page - probably best NOT to load an image and just let facebook spider this page, it's like a tag page really.
 		} else {
 			$options = get_option('wpfbogp');				
 			//If a fallback image is set then use it, but don't force this option on users 
@@ -150,12 +154,16 @@ class OgpMetaModel {
 	function _getDescription(){
 		global $post;//TODO: These damn globals are nasty!!
 		
-		if (is_singular('post')) {
+		if (is_singular()) {
 			if (has_excerpt()) {
 				$this->_meta['description'] = esc_attr(strip_tags(get_the_excerpt()));//Passing post->ID is deprecated
 			}else{	
 				//Then strip out all tags and chop it after 160 chars
 				$this->_meta['description'] = esc_attr(str_replace("\r\n",' ',substr(strip_tags(strip_shortcodes($post->post_content)), 0, 160)));					
+				if($this->_meta['description'] == ''){
+					//If there's no parsable content we are better to return false (and not render) than to render a blank string
+					$this->_meta['description'] = false;
+				}
 				
 				//TODO: Would we better using all the sites filters and then stripping it from that? eg
 				/*
@@ -167,7 +175,16 @@ class OgpMetaModel {
 				
 				 */
 			}
-		}else{
+		} elseif(is_author()) {
+			//TODO: This seems a little hacky...
+			if(have_posts()) {
+				the_post();			
+				if ( $_description = get_the_author_meta( 'description' ) ){				
+					$this->_meta['description'] = esc_attr(str_replace("\r\n",' ',substr(strip_tags(strip_shortcodes($_description)), 0, 160)));					
+				}				
+				rewind_posts();
+			}
+		} else {
 			$this->_meta['description'] = get_bloginfo('description');
 		}		
 		
