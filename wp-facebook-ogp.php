@@ -104,7 +104,7 @@ function wpfbogp_build_head() {
 		// do descriptions
 		if (is_singular('post')) {
 			if (has_excerpt($post->ID)) {
-				echo "\t<meta property='og:description' content='".esc_attr(strip_tags(get_the_excerpt($post->ID)))."' />\n";
+				echo "\t<meta property='og:description' content='".esc_attr(strip_tags(get_the_excerpt()))."' />\n";
 			}else{
 				echo "\t<meta property='og:description' content='".esc_attr(str_replace("\r\n",' ',substr(strip_tags(strip_shortcodes($post->post_content)), 0, 160)))."' />\n";
 			}
