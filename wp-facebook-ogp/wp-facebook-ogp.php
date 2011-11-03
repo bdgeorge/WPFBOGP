@@ -27,6 +27,7 @@ License: GPL2
 
 define('WPFBOGP_VERSION', '1.3.5');
 include_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
+include_once(dirname(__FILE__) . '/class-ogp-render.php');
 
 wpfbogp_admin_warnings();
 
@@ -55,8 +56,10 @@ function wpfbogp_first_image() {
   $wpfbogp_first_img = '';
   ob_start();
   ob_end_clean();
-  $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches);
-  $wpfbogp_first_img = $matches [1] [0];
+	$content = apply_filters('the_content', $post->post_content);
+	$content = str_replace(']]>', ']]>', $content);  
+  $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches);
+  $wpfbogp_first_img = $matches [1] [0];//TODO: generates an notice on post with no images
   if(empty($wpfbogp_first_img)){ // return false if nothing there, makes life easier
     return false;
   }
@@ -104,7 +107,7 @@ function wpfbogp_build_head() {
 		// do descriptions
 		if (is_singular('post')) {
 			if (has_excerpt($post->ID)) {
-				echo "\t<meta property='og:description' content='".esc_attr(strip_tags(get_the_excerpt($post->ID)))."' />\n";
+				echo "\t<meta property='og:description' content='".esc_attr(strip_tags(get_the_excerpt()))."' />\n";
 			}else{
 				echo "\t<meta property='og:description' content='".esc_attr(str_replace("\r\n",' ',substr(strip_tags(strip_shortcodes($post->post_content)), 0, 160)))."' />\n";
 			}
@@ -142,7 +145,11 @@ function wpfbogp_build_head() {
 		}
 		echo "\t<!-- // end wpfbogp -->\n\n";
 		} // end isset admin ids
-		var_dump(new OgpMetaModel);
+		
+		//Should be the same results
+		$_metaModel = new OgpMetaModel;
+		$_renderer = new OgpRenderOgp($_metaModel);
+		echo($_renderer->getAllMeta());
 
 } // end function
 

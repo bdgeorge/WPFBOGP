@@ -18,16 +18,16 @@ class OgpRenderOgp {
 	 * @var Array of output formats for this renderer
 	 */
 	var $_formats = array(
-		'sitename'		=> "\t<meta property='og:site_name' content='%s' />\n",
 		'admins'		=> "\t<meta property='fb:admins' content='%s' />\n",
 		'app_id'		=> "\t<meta property='fb:app_id' content='%s' />\n",
-		'page_id'		=> "\t<meta gitproperty='fb:page_id' content='%s' />\n",
+		'page_id'		=> "\t<meta property='fb:page_id' content='%s' />\n",
 		'url'			=> "\t<meta property='og:url' content='%s' />\n",
 		'title'			=> "\t<meta property='og:title' content='%s' />\n",
+		'site_name'		=> "\t<meta property='og:site_name' content='%s' />\n",		
 		'description'	=> "\t<meta property='og:description' content='%s' />\n",
 		'type'			=> "\t<meta property='og:type' content='%s' />\n",
 		'image'			=> "\t<meta property='og:image' content='%s' />\n",
-	)
+	);
 	
 	/**
 	 * PHP4 style Constructor - Calls PHP5 Style Constructor
@@ -45,11 +45,11 @@ class OgpRenderOgp {
 	 */
 	function __construct($model = null) {
 		if($model)
-			$this->setModel($model);
+			$this->useModel($model);
 	}	
 	
 	function useModel($model){
-		$this->_modelData = $model->getData();
+		$this->_modelData = $model->getMeta();
 		return $this;
 	}
 	
@@ -58,44 +58,20 @@ class OgpRenderOgp {
 		foreach ($this->_modelData as $itemKey => $itemValue){
 			switch ($itemKey){				
 				case 'images':
-					if(array_key_exists('image', $this->_formats)){
+					if(array_key_exists('image', $this->_formats) && false != $itemValue){
 						foreach($itemValue as $image){
-							$_output .= sprintf($this->_formats['image'], $mage);							
+							$_output .= sprintf($this->_formats['image'], $image);							
 						}						
+					} else {
+						$_output .= "\t<!-- There is no image here as you haven't set a default image in the plugin settings! -->\n"; 
 					}								
 					break;
 				default:
-					if(array_key_exists($itemKey, $this->_formats)){
+					if(array_key_exists($itemKey, $this->_formats) && false != $itemValue){
 						$_output .= sprintf($this->_formats[$itemKey], $itemValue);
 					}
 			}
 		}
-	}
-	
-	function getSiteName(){
-		if(array_key_exists('sitename', $this->_model))
-			return sprintf($this->_formats['sitename'], $this->_model['sitename']);
-		return false;
-	}
-	
-	function getDescription(){
-		if(array_key_exists('description', $this->_model))
-			return "\t<meta property='og:description' content='" . $this->_model['description'] . "' />\n";
-		return false;
+		return $_output;
 	}	
-
-	function getType(){
-		if(array_key_exists('type', $this->_model))
-			return "\t<meta property='og:type' content='" . $this->_model['description'] . "' />\n";
-		return false;
-	}	
-	
-	function getImages(){
-		if(array_key_exists('images', $this->_model))
-			foreach($this->_model['images'] as $_img){
-				
-			}
-		return false;
-	}		
-	
 }

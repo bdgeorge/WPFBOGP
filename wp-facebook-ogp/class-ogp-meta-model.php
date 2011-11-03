@@ -36,6 +36,7 @@ class OgpMetaModel {
 	 * @return OgpMetaModel
 	 */
 	function __construct($id = 0) {
+		global $post;		
 		
 		//Get the non post related meta data
 		$options = get_option('wpfbogp');
@@ -48,8 +49,13 @@ class OgpMetaModel {
 		if (isset($options['wpfbogp_page_id']) && $options['wpfbogp_page_id'] != '') {
 			$this->_meta['page_id'] = $options['wpfbogp_page_id'];
 		}		
-		$this->_meta['site_name'] = get_bloginfo('name');		
-		
+
+		if (is_home() || is_front_page() ) {
+			$this->_meta['url'] =  get_bloginfo('url');
+		}else{
+			$this->_meta['url'] = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; //TODO: There must be a more wordpress way to do this. What if we're https? Or with some silly google translate querystring vars?
+		}			
+		$this->_meta['site_name'] = get_bloginfo('name');			
 		//Now Get the post and set up all it's related meta data
 		$this->usePost($id);
 		
@@ -63,13 +69,13 @@ class OgpMetaModel {
 		$_oldPost = $post;
 				
 		//TODO: Can we assume that the post variable is available? These damn globals are nasty!!
+		//Or do we need to get a post Id passed in then and use get_post($id) to get the post object??		
 		$this->_post = get_post($id);
-		//Or do we need to get a post Id passed in then and use get_post($id) to get the post object??
 					
-		$this->_getDescription()	
-			 ->_getImages()
-			 ->_getTitle()
-			 ->_getType();		
+		$this->_getTitle()
+			->_getDescription()	
+			->_getType()			
+			->_getImages();		
 			 
 		$post = $_oldPost;
 		return $this;
@@ -84,7 +90,7 @@ class OgpMetaModel {
 	}
 	
 	/**
-	 * 
+	 * Get the first image from the images array.
 	 * @return string | bool The url for the first image in the post or false
 	 */
 	function getFirstImage(){
@@ -102,35 +108,16 @@ class OgpMetaModel {
 	function _getImages(){
 		global $post;
 		
-		/*
-		$_firstImage = null;
-		
-		if (is_home()) {
-			//TODO: If we are on the home page we should really let facebook scrape the page
-			if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
-				$this->_meta['images'][] = $options['wpfbogp_fallback_img'];
-			}
-		} else {
-			if ((function_exists('has_post_thumbnail')) && (has_post_thumbnail($post->ID))) {
-				$thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail' );
-				$_firstImage = esc_attr($thumbnail_src[0]);
-			}elseif (( wpfbogp_first_image() !== false ) && (is_singular())) {
-				$_firstImage = wpfbogp_first_image();
-			}else{
-				if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
-					echo "\t<meta property='og:image' content='".$options['wpfbogp_fallback_img']."' />\n";
-				}else{
-					echo "\t<!-- There is not an image here as you haven't set a default image in the plugin settings! -->\n"; 
-				}
-			}
-		}	
-		*/
-		
 		if (is_singular('post')) {
-			$this->_meta['images'] = $this->_getAllImageInPost();
+			$this->_meta['images'] = $this->_getAllImagesInPost();
 		} else {
-			$this->_meta['images'] = false;
-		}			
+			$options = get_option('wpfbogp');				
+			if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
+				$this->_meta['images'] = $options['wpfbogp_fallback_img'];			
+			} else {
+				$this->_meta['images'] = false;
+			}
+		}
 		return $this;	
 	}
 	
@@ -138,7 +125,7 @@ class OgpMetaModel {
 	 * Scans the post for images within the content.
 	 * Regex from Wordpress Get The Image plugin 
 	 */
-	function _getAllImageInPost(){
+	function _getAllImagesInPost(){
 		//global $post;
 		
 		/* Search the post's content for the <img /> tag and get its URL. */
