@@ -26,9 +26,9 @@ License: GPL2
 */
 
 define('WPFBOGP_VERSION', '1.3.5');
-include_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
-include_once(dirname(__FILE__) . '/class-ogp-render.php');
-include_once(dirname(__FILE__) . '/class-ogp-render-facebook.php');
+require_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
+require_once(dirname(__FILE__) . '/class-ogp-render.php');
+require_once(dirname(__FILE__) . '/class-ogp-render-facebook.php');
 
 wpfbogp_admin_warnings();
 
@@ -51,26 +51,10 @@ function wpfbogp_namespace($output) {
 }
 add_filter('language_attributes','wpfbogp_namespace');
 
-// function to call first uploaded image in functions file. borrowed from i forgot :/ sorry.
-function wpfbogp_first_image() {
-  global $post, $posts;
-  $wpfbogp_first_img = '';
-  ob_start();
-  ob_end_clean();
-	$content = apply_filters('the_content', $post->post_content);
-	$content = str_replace(']]>', ']]>', $content);  
-  $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches);
-  $wpfbogp_first_img = $matches [1] [0];//TODO: generates an notice on post with no images
-  if(empty($wpfbogp_first_img)){ // return false if nothing there, makes life easier
-    return false;
-  }
-  return $wpfbogp_first_img;
-}
-
 // build ogp meta
 function wpfbogp_build_head() {
 		$_metaModel = new OgpMetaModel;
-		$_renderer = new OgpRenderFacebook($_metaModel);
+		$_renderer = new OgpRenderFacebook($_metaModel);	
 		echo($_renderer->getAllMeta());
 } // end function
 

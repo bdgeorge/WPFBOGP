@@ -88,18 +88,7 @@ class OgpMetaModel {
 	function getMeta(){
 		return $this->_meta;
 	}
-	
-	/**
-	 * Get the first image from the images array.
-	 * @return string | bool The url for the first image in the post or false
-	 */
-	function getFirstImage(){
-		if( array_key_exists('images', $this->_meta) && (count($this->_meta['images']) > 0) ){
-			return $this->_meta['images'][0];
-		}
-		return false;
-	}				
-
+					
 	/**
 	 * Get an array of all images in the post, if we aren't on a single post page then 
 	 * don't get any images at all - let facebook etc scrape the page.
@@ -152,7 +141,7 @@ class OgpMetaModel {
 	
 	/**
 	 * Get the description from (in this order)
-	 * 1. A custom meta field
+	 * 1. A custom meta field TODO
 	 * 2. The excerpt
 	 * 3. The post content
 	 * 4. The blogs default description field
