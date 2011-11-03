@@ -15,12 +15,9 @@ class OgpRenderOgp {
 	var $_post;
 	
 	/**
-	 * @var Array of output formats for this renderer
+	 * @var Array of basic output formats for this renderer
 	 */
 	var $_formats = array(
-		'admins'		=> "\t<meta property='fb:admins' content='%s' />\n",
-		'app_id'		=> "\t<meta property='fb:app_id' content='%s' />\n",
-		'page_id'		=> "\t<meta property='fb:page_id' content='%s' />\n",
 		'url'			=> "\t<meta property='og:url' content='%s' />\n",
 		'title'			=> "\t<meta property='og:title' content='%s' />\n",
 		'site_name'		=> "\t<meta property='og:site_name' content='%s' />\n",		
@@ -48,6 +45,11 @@ class OgpRenderOgp {
 			$this->useModel($model);
 	}	
 	
+	/**
+	 * Pass the renderer a model to use
+	 * @param OgpMetaModel $model
+	 * @return 
+	 */
 	function useModel($model){
 		$this->_modelData = $model->getMeta();
 		return $this;
@@ -59,8 +61,12 @@ class OgpRenderOgp {
 			switch ($itemKey){				
 				case 'images':
 					if(array_key_exists('image', $this->_formats) && false != $itemValue){
-						foreach($itemValue as $image){
-							$_output .= sprintf($this->_formats['image'], $image);							
+						if(is_array($itemValue)){
+							foreach($itemValue as $image){
+								$_output .= sprintf($this->_formats['image'], $image);							
+							}							
+						} elseif($itemValue){
+							$_output .= sprintf($this->_formats['image'], $itemValue);
 						}						
 					} else {
 						$_output .= "\t<!-- There is no image here as you haven't set a default image in the plugin settings! -->\n"; 

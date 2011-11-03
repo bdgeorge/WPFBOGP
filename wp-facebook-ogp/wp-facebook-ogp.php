@@ -28,6 +28,7 @@ License: GPL2
 define('WPFBOGP_VERSION', '1.3.5');
 include_once(dirname(__FILE__) . '/class-ogp-meta-model.php');
 include_once(dirname(__FILE__) . '/class-ogp-render.php');
+include_once(dirname(__FILE__) . '/class-ogp-render-facebook.php');
 
 wpfbogp_admin_warnings();
 
@@ -68,89 +69,9 @@ function wpfbogp_first_image() {
 
 // build ogp meta
 function wpfbogp_build_head() {
-	global $post;
-	$options = get_option('wpfbogp');
-	// check to see if you've filled out one of the required fields and announce if not
-	if ((!isset($options['wpfbogp_admin_ids']) || empty($options['wpfbogp_admin_ids'])) && (!isset($options['wpfbogp_app_id']) || empty($options['wpfbogp_app_id']))) {
-		echo "\n\t<!-- Facebook Open Graph protocol plugin NEEDS an admin or app ID to work, please visit the plugin settings page! -->\n\n";
-	}else{
-		echo "\n\t<!-- WordPress Facebook Open Graph protocol plugin (WPFBOGP v".WPFBOGP_VERSION.") http://rynoweb.com/wordpress-plugins/ -->\n";
-		
-		// do fb verification fields
-		if (isset($options['wpfbogp_admin_ids']) && $options['wpfbogp_admin_ids'] != '') {
-			echo "\t<meta property='fb:admins' content='".esc_attr($options['wpfbogp_admin_ids'])."' />\n";
-		}
-		if (isset($options['wpfbogp_app_id']) && $options['wpfbogp_app_id'] != '') {
-			echo "\t<meta property='fb:app_id' content='".esc_attr($options['wpfbogp_app_id'])."' />\n";
-		}
-		if (isset($options['wpfbogp_page_id']) && $options['wpfbogp_page_id'] != '') {
-			echo "\t<meta property='fb:page_id' content='".esc_attr($options['wpfbogp_page_id'])."' />\n";
-		}
-		
-		// do url stuff
-		if (is_home() || is_front_page() ) {
-			echo "\t<meta property='og:url' content='".get_bloginfo('url')."' />\n";
-		}else{
-			echo "\t<meta property='og:url' content='http://".$_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']."' />\n";
-		}
-		
-		// do title stuff
-		if (is_home() || is_front_page() ) {
-			echo "\t<meta property='og:title' content='".get_bloginfo('name')."' />\n";
-		}else{
-			echo "\t<meta property='og:title' content='".get_the_title()."' />\n";
-		}
-		
-		// do additional randoms
-		echo "\t<meta property='og:site_name' content='".get_bloginfo('name')."' />\n";
-		
-		// do descriptions
-		if (is_singular('post')) {
-			if (has_excerpt($post->ID)) {
-				echo "\t<meta property='og:description' content='".esc_attr(strip_tags(get_the_excerpt()))."' />\n";
-			}else{
-				echo "\t<meta property='og:description' content='".esc_attr(str_replace("\r\n",' ',substr(strip_tags(strip_shortcodes($post->post_content)), 0, 160)))."' />\n";
-			}
-		}else{
-			echo "\t<meta property='og:description' content='".get_bloginfo('description')."' />\n";
-		}
-		
-		// do ogp type
-		if (is_singular('post')) {
-			echo "\t<meta property='og:type' content='article' />\n";
-		}else{
-			echo "\t<meta property='og:type' content='website' />\n";
-		}
-		
-		// do image tricks
-		if (is_home()) {
-			if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
-				echo "\t<meta property='og:image' content='".$options['wpfbogp_fallback_img']."' />\n";
-			}else{
-				echo "\t<!-- There is not an image here as you haven't set a default image in the plugin settings! -->\n"; 
-			}
-		} else {
-			if ((function_exists('has_post_thumbnail')) && (has_post_thumbnail($post->ID))) {
-				$thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail' );
-				echo "\t<meta property='og:image' content='".esc_attr($thumbnail_src[0])."' />\n";
-			}elseif (( wpfbogp_first_image() !== false ) && (is_singular())) {
-				echo "\t<meta property='og:image' content='".wpfbogp_first_image()."' />\n";
-			}else{
-				if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
-					echo "\t<meta property='og:image' content='".$options['wpfbogp_fallback_img']."' />\n";
-				}else{
-					echo "\t<!-- There is not an image here as you haven't set a default image in the plugin settings! -->\n"; 
-				}
-			}
-		}
-		echo "\t<!-- // end wpfbogp -->\n\n";
-		} // end isset admin ids
-		
-		//Should be the same results
 		$_metaModel = new OgpMetaModel;
-		$_renderer = new OgpRenderOgp($_metaModel);
+		$_renderer = new OgpRenderFacebook($_metaModel);
 		echo($_renderer->getAllMeta());
-
 } // end function
 
 

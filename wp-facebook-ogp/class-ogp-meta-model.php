@@ -109,9 +109,21 @@ class OgpMetaModel {
 		global $post;
 		
 		if (is_singular('post')) {
-			$this->_meta['images'] = $this->_getAllImagesInPost();
+			$this->_meta['images'] = array();
+			if ((function_exists('has_post_thumbnail')) && (has_post_thumbnail($post->ID))) {
+				if($_thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail' )){
+					$this->_meta['images'][] = $_thumb[0];					
+				};
+			}
+			if($_images = $this->_getAllImagesInPost()){
+				$this->_meta['images'] = array_merge($this->_meta['images'], $this->_getAllImagesInPost());				
+			}
+			//The thumbnail (if it was found) is typically repeated later in the post
+			$this->_meta['images'] = array_unique($this->_meta['images']);
 		} else {
 			$options = get_option('wpfbogp');				
+			//If a fallback image is set then use it, but don't force this option on users 
+			//as it can be counter productive on the home page etc
 			if (isset($options['wpfbogp_fallback_img']) && $options['wpfbogp_fallback_img'] != '') {
 				$this->_meta['images'] = $options['wpfbogp_fallback_img'];			
 			} else {
