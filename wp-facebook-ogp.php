@@ -53,8 +53,10 @@ function wpfbogp_first_image() {
   $wpfbogp_first_img = '';
   ob_start();
   ob_end_clean();
-  $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches);
-  $wpfbogp_first_img = $matches [1] [0];
+	$content = apply_filters('the_content', $post->post_content); //benz001 - go through filters so we apply shortcodes etc, this ensures gallery images are checked
+	$content = str_replace(']]>', ']]>', $content);  
+  $output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content, $matches);
+  $wpfbogp_first_img = $matches [1] [0];//TODO: generates an notice on post with no images
   if(empty($wpfbogp_first_img)){ // return false if nothing there, makes life easier
     return false;
   }
